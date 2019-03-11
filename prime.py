@@ -11,13 +11,50 @@ False
 [3, 5, 823]
 
 然后函数is_primeF(n)以费马小定理做素数测试，repunit_prime(s, n)列出是素数的循环整数，例如：
+
 >>> is_primeF(1111111)
 False
 >>> repunit_prime('1', 10)
 {1, 2}
+
+增加is_primeM(n)做Miller Rabin素性测试，MR_test(a,n)用于发现强伪素数（返回值帮助分解因子，算法有待实现）
+
+>>> is_primeM(1111111)
+False
+>>> MR_test(2, 1111111)
+0
 """
 
-import math
+def isqrt(n) :
+    """计算整数平方根，忽略小数部分，即找到最大整数r满足r^2 <=n and (r+1)^2 >n。
+       牛顿迭代法，x <- ( x + n/x )/2，初值估计取1*2^s用公式做一次迭代。
+       细致分析:
+        1、用到整数除法 n//a = b，整数除法的不对称性，n=a*b+d，取决与d的大小n//a=b不一定n//b=a。
+        2、整数除法n=a*b+d，若a>b且a>d，可以证明a^2> n >b^2 。
+        3、对全局凹（凸）曲线，每次迭代总是从曲线单侧（背部？）逐步逼近，因而总是收敛。a> [(a+b)//2] >=b (只在a-b == 1时取等号)。
+           可以证明，一般总是[(a+b)//2]^2 >n，如果[(a+b)//2]^2或[(a+b-1)//2]^2 <=n，则必有[(a+b+1)//2]^2 >n，按照定义就是平方根r。
+
+    >>> isqrt(0)
+    0
+    >>> isqrt(1)
+    1
+    >>> isqrt(8)
+    2
+    >>> isqrt(64)
+    8
+    >>> isqrt(1000)
+    31
+    """
+    if n<=0 :
+        return 0
+    c = n.bit_length()>>1
+    r = ((1<<c) + (n>>c))>>1
+    while True :
+        t = ( r + n//r )>>1
+        if t >= r :
+            break;
+        r = t
+    return r
 
 def is_prime(n) :
     """试除法判定素数，从2除至sqrt(n)。
@@ -42,7 +79,7 @@ def is_prime(n) :
     elif n%2==0 or n%3==0 :
         return False
 
-    for i in range(6, int(math.sqrt(n))+2, 6) :
+    for i in range(6, isqrt(n)+2, 6) :
         if n%(i-1)==0 or n%(i+1)==0 :
             return False
     return True
@@ -71,7 +108,7 @@ def factorize(n) :
             res.append(3)
             n //= 3
             continue
-        for i in range(6, int(math.sqrt(n))+2, 6) :
+        for i in range(6, isqrt(n)+2, 6) :
             if n%(i-1)==0 :
                 res.append(i-1)
                 n //= i-1
@@ -218,5 +255,3 @@ def repunit_prime(s, n) :
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
-
-
