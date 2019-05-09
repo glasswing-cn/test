@@ -24,6 +24,7 @@ int main()
 	}
 
 	drmVersion *ver = drmGetVersion(fd);
+	out_drmVersion(ver);
 	drmModeRes *res = drmModeGetResources(fd);
 	out_drmModeRes(res);
 	for ( int i=0; i<(res->count_fbs); i++ ) {
@@ -45,6 +46,13 @@ int main()
 		drmModeEncoder *encoder = drmModeGetEncoder(fd, res->encoders[i]);
 		out_drmModeEncoder(encoder);
 		drmModeFreeEncoder(encoder);
+	}
+	drmModePlaneRes *pln_res = drmModeGetPlaneResources(fd);
+	out_drmModePlaneRes(pln_res);
+	for ( int i=0; i<(pln_res->count_planes); i++ ) {
+		drmModePlane *pln = drmModeGetPlane(fd, pln_res->planes[i]);
+		out_drmModePlane(pln);
+		drmModeFreePlane(pln);
 	}
 
 /*
@@ -82,6 +90,7 @@ int main()
 	drmIoctl(drm_obj.fd, DRM_IOCTL_MODE_DESTROY_DUMB, &de);
 */
 
+	drmModeFreePlaneResources(pln_res);
 	drmModeFreeResources(res);
 	drmFreeVersion(ver);
 	close(fd);

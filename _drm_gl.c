@@ -2,6 +2,7 @@
 #include <errno.h>
 #include <err.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/mman.h>
@@ -9,7 +10,7 @@
 #include <xf86drm.h>
 #include <xf86drmMode.h>
 
-#include "out_struct.c"
+#include "_out_struct.c"
 
 struct  drm_object {
 	int fd;
@@ -27,35 +28,11 @@ struct buf_object {
 	uint32_t size;
 } buf;
 
+uint32_t fb_width, fb_height;
+
 uint32_t *pixel(uint32_t x, uint32_t y)
 {
 	return buf.vaddr + x + y*(buf.width+8) ;
-}
-
-uint32_t XRGB(uint8_t x, uint8_t r, uint8_t g, uint8_t b)
-{
-	return (x<<24) | (r<<16) | (g<<8) | (b) ;
-}
-
-uint32_t get_pixel(uint32_t x, uint32_t y)
-{
-	if ( x<buf.width && y<buf.height )
-		return *pixel(x, y);
-	else
-		return 0;
-}
-
-void set_pixel(uint32_t x, uint32_t y, uint32_t color)
-{
-	if ( x<buf.width && y<buf.height )
-		*pixel(x, y) = color;
-}
-
-void rect(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t color)
-{
-	for ( int i=0; i<w; i++ )
-	for ( int j=0; j<h; j++ )
-		set_pixel(x+i, y+j, color);
 }
 
 int gl_init()
@@ -100,6 +77,9 @@ int gl_init()
 	drm_obj.fd = fd;
 	drm_obj.res = res;
 	drm_obj.conn = conn;
+
+	fb_width = buf.width;
+	fb_height = buf.height;
 	return 0;
 }
 
@@ -122,26 +102,4 @@ void gl_show()
 	uint32_t crtc_id = drm_obj.res->crtcs[0];
 	uint32_t conn_id = drm_obj.res->connectors[0];
 	drmModeSetCrtc(drm_obj.fd, crtc_id, buf.fb_id, 0, 0, &conn_id, 1, drm_obj.conn->modes);
-}
-
-int main()
-{
-	gl_init();
-
-	uint32_t color = XRGB(0, 0, 0xCC, 0xCC);
-	set_pixel(0, 0, color);
-	set_pixel(1500, 0, color);
-	set_pixel(2999, 0, color);
-	set_pixel(0, 1000, color);
-	set_pixel(1500, 1000, color);
-	set_pixel(2999, 1000, color);
-	set_pixel(0, 1999, color);
-	set_pixel(1500, 1999, color);
-	set_pixel(2999, 1999, color);
-	rect(1480, 900, 40, 90, XRGB(0, 0x70, 0xF0, 0x60));
-
-	gl_show();
-	getchar();
-
-	gl_fin();
 }

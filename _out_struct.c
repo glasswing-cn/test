@@ -17,6 +17,13 @@ void out_##x ( x *s ) \
 }
 
 
+#define _OUT_STRUCT_STT(x)	\
+void out_##x ( struct x *s ) \
+{ \
+	printf("%.*s", __level, __PRELUDE); \
+	printf("struct %s {\n", #x);
+
+
 #define _PRT_STT_S(x) \
 	printf("%.*s", __level, __PRELUDE); \
 	printf("\t.%s = \"%s\"\n", #x, s-> x);
@@ -32,6 +39,10 @@ void out_##x ( x *s ) \
 #define _PRT_STT_3(x, y, z) \
 	printf("%.*s", __level, __PRELUDE); \
 	printf("\t.%s, .%s, .%s = %ld, %ld, %ld\n", #x, #y, #z, s-> x, s-> y, s-> z);
+
+#define _PRT_STT_4(x, y, z, t) \
+	printf("%.*s", __level, __PRELUDE); \
+	printf("\t.%s, .%s, .%s, .%s = %ld, %ld, %ld, %ld\n", #x, #y, #z, #t, s-> x, s-> y, s-> z, s-> t);
 
 #define _PRT_STT_L(x, n) \
 	printf("%.*s", __level, __PRELUDE); \
@@ -56,6 +67,7 @@ void out_##x ( x *s ) \
 
 
 ////////////////////////////////////////////////
+#ifdef _XF86DRM_H_
 
 _OUT_STRUCT( drmModeRes )
 
@@ -157,3 +169,80 @@ _OUT_STRUCT( drmModePlane )
 	_PRT_STT_1(gamma_size)
 
 _FIN_STRUCT
+
+
+_OUT_STRUCT( drmModePlaneRes )
+
+	_PRT_STT_L(planes, s->count_planes)
+
+_FIN_STRUCT
+
+
+////////////////////////////////////////////////////////////////////
+
+_OUT_STRUCT( drmVersion )
+
+	_PRT_STT_1(version_major)
+	_PRT_STT_1(version_minor)
+	_PRT_STT_1(version_patchlevel)
+	_PRT_STT_S(name)
+	_PRT_STT_S(date)
+	_PRT_STT_S(desc)
+
+_FIN_STRUCT
+
+#endif
+
+////////////////////////////////////////////////////////////////////
+
+#ifdef _LINUX_FB_H
+
+_OUT_STRUCT_STT( fb_fix_screeninfo )
+
+	_PRT_STT_S(id)
+	_PRT_STT_1(smem_start)
+	_PRT_STT_1(smem_len)
+	_PRT_STT_1(type)
+	_PRT_STT_1(type_aux)
+	_PRT_STT_1(visual)
+	_PRT_STT_3(xpanstep, ypanstep, ywrapstep)
+	_PRT_STT_1(line_length)
+	_PRT_STT_1(mmio_start)
+	_PRT_STT_1(mmio_len)
+	_PRT_STT_1(accel)
+	_PRT_STT_1(capabilities)
+	_PRT_STT_2(reserved[0], reserved[1])
+
+_FIN_STRUCT
+
+
+_OUT_STRUCT_STT( fb_var_screeninfo )
+
+	_PRT_STT_2(xres, yres)
+	_PRT_STT_2(xres_virtual, yres_virtual)
+	_PRT_STT_2(xoffset, yoffset)
+
+	_PRT_STT_1(bits_per_pixel)
+	_PRT_STT_1(grayscale)
+
+	_PRT_STT_3(red.offset, red.length, red.msb_right)
+	_PRT_STT_3(green.offset, green.length, green.msb_right)
+	_PRT_STT_3(blue.offset, blue.length, blue.msb_right)
+	_PRT_STT_3(transp.offset, transp.length, transp.msb_right)
+
+	_PRT_STT_1(nonstd)
+	_PRT_STT_1(activate)
+	_PRT_STT_2(height, width)
+	_PRT_STT_1(accel_flags)
+
+	_PRT_STT_4(left_margin, right_margin, upper_margin, lower_margin)
+	_PRT_STT_2(hsync_len, vsync_len)
+	_PRT_STT_1(sync)
+	_PRT_STT_1(vmode)
+	_PRT_STT_1(rotate)
+	_PRT_STT_1(colorspace)
+	_PRT_STT_4(reserved[0], reserved[1], reserved[2], reserved[3])
+
+_FIN_STRUCT
+
+#endif
