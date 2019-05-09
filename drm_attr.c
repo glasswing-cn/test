@@ -9,7 +9,7 @@
 #include <xf86drm.h>
 #include <xf86drmMode.h>
 
-#include "out_struct.c"
+#include "_out_struct.c"
 
 int main()
 {
